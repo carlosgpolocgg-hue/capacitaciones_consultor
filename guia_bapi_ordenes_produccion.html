@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía BAPI — Órdenes de Producción SAP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --accent: #3b82f6;
+  --accent2: #60a5fa;
+  --gold: #f59e0b;
+  --gold2: #fbbf24;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --dim: #475569;
+  --success: #10b981;
+  --error: #ef4444;
+  --warn: #f59e0b;
+  --code-bg: #0d1117;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* ── HEADER ── */
+header {
+  border-bottom: 1px solid var(--border2);
+  padding: 32px 0 0;
+  margin-bottom: 56px;
+  position: relative;
+}
+
+.header-inner { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+
+.brand { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+
+.brand-logo {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: #fff;
+  letter-spacing: -1px;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.doc-meta { text-align: right; }
+
+.doc-tag {
+  display: inline-block;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.25);
+  color: var(--accent2);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-family: 'DM Mono', monospace;
+}
+
+.doc-date { font-size: 12px; color: var(--dim); font-family: 'DM Mono', monospace; }
+
+.hero { padding-bottom: 40px; }
+
+.hero-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--accent2);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-label::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent2);
+}
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--muted);
+  margin-top: 16px;
+  max-width: 520px;
+}
+
+.author-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-top: 28px;
+}
+
+.author-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #7c3aed 100%);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.author-info { font-size: 13px; }
+.author-name { color: var(--text); font-weight: 500; }
+.author-role { color: var(--muted); font-size: 11px; margin-top: 1px; }
+
+/* ── PROGRESS NAV ── */
+.progress-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,14,26,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+  margin: 0 -24px 48px;
+}
+
+.progress-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.progress-inner::-webkit-scrollbar { display: none; }
+
+.nav-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .2s;
+  font-size: 12px;
+  color: var(--dim);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.nav-step:hover { color: var(--muted); }
+.nav-step.active { color: var(--accent2); border-bottom-color: var(--accent); }
+
+.nav-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  flex-shrink: 0;
+  transition: all .2s;
+}
+
+.nav-step.active .nav-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.nav-step.done .nav-num {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.nav-step.done { color: var(--muted); }
+
+/* ── STEP PANELS ── */
+.step-panel { display: none; animation: fadeUp .3s ease; }
+.step-panel.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── STEP HEADER ── */
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.step-number {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: 56px;
+  line-height: 1;
+  color: rgba(59,130,246,0.15);
+  flex-shrink: 0;
+  letter-spacing: -2px;
+  user-select: none;
+}
+
+.step-titles { padding-top: 4px; }
+
+.step-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 6px;
+}
+
+.step-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1.2;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.step-desc {
+  font-size: 15px;
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.7;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── CODE BLOCK ── */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #e2e8f0;
+  overflow-x: auto;
+  position: relative;
+}
+
+.code-label {
+  position: absolute;
+  top: 10px; right: 12px;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.code-block .t-blue { color: #60a5fa; }
+.code-block .t-green { color: #34d399; }
+.code-block .t-gold { color: #fbbf24; }
+.code-block .t-gray { color: #64748b; }
+.code-block .t-red { color: #f87171; }
+
+/* ── TABLE ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  border-bottom: 1px solid var(--border2);
+  font-weight: 500;
+}
+
+.data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.field-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--accent2);
+  font-weight: 500;
+}
+
+.field-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--gold2);
+}
+
+.field-fmt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.field-note {
+  font-size: 11px;
+  color: var(--dim);
+  margin-top: 2px;
+}
+
+/* ── CALLOUT ── */
+.callout {
+  display: flex;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.callout-info { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); }
+.callout-tip  { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+.callout-warn { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.2);  }
+
+.callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.callout-text { color: var(--muted); }
+.callout-text strong { color: var(--text); font-weight: 500; }
+
+/* ── STATUS BADGES ── */
+.badge-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.badge-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-dot.s { background: var(--success); box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+.badge-dot.e { background: var(--error);   box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+.badge-dot.w { background: var(--warn);    box-shadow: 0 0 8px rgba(245,158,11,0.5); }
+
+.badge-type {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+.badge-type.s { color: var(--success); }
+.badge-type.e { color: var(--error); }
+.badge-type.w { color: var(--warn); }
+
+.badge-desc { font-size: 12px; color: var(--muted); }
+
+/* ── ANALOGY BOX ── */
+.analogy {
+  background: linear-gradient(135deg, rgba(59,130,246,0.05), rgba(124,58,237,0.05));
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.analogy::before {
+  content: '"';
+  position: absolute;
+  top: -10px; right: 16px;
+  font-family: 'Fraunces', serif;
+  font-size: 100px;
+  color: rgba(59,130,246,0.08);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.analogy-text {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text);
+  font-weight: 300;
+}
+
+.analogy-source {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── FLOW DIAGRAM ── */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 20px 0;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.flow-box {
+  flex-shrink: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  text-align: center;
+  min-width: 110px;
+}
+
+.flow-box-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.flow-box-val { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent2); font-weight: 500; }
+
+.flow-arrow {
+  flex-shrink: 0;
+  padding: 0 8px;
+  color: var(--dim);
+  font-size: 18px;
+}
+
+.flow-box.highlight {
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.08);
+}
+
+.flow-box.highlight .flow-box-val { color: var(--gold2); }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  gap: 12px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all .2s;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+.btn-ghost { background: transparent; }
+
+.step-counter {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+/* ── TABS (for SE37 sim) ── */
+.tabs-nav {
+  display: flex;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 20px;
+  gap: 0;
+}
+
+.tab-btn {
+  padding: 10px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--dim);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all .15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.tab-btn:hover { color: var(--muted); }
+.tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── FOOTER ── */
+footer {
+  margin-top: 80px;
+  padding: 32px 0;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-copy { font-size: 12px; color: var(--dim); }
+.footer-ver {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* Tag pill */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.pill-blue { background: rgba(59,130,246,0.12); color: var(--accent2); border: 1px solid rgba(59,130,246,0.2); }
+.pill-gold { background: rgba(245,158,11,0.12); color: var(--gold2);   border: 1px solid rgba(245,158,11,0.2); }
+.pill-green{ background: rgba(16,185,129,0.12); color: #34d399;        border: 1px solid rgba(16,185,129,0.2); }
+
+.pills-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">St</div>
+      <div>
+        <div class="brand-name">Stratesys</div>
+        <div class="brand-sub">Centro de Excelencia SAP</div>
+      </div>
+    </div>
+    <div class="doc-meta">
+      <div class="doc-tag">Documento técnico</div>
+      <div class="doc-date">Abril 2026 · v1.0</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-label">Capacitación interna · Módulo PP</div>
+    <h1>Creación de Órdenes de<br>Producción con <em>BAPIs</em></h1>
+    <p class="hero-sub">Guía paso a paso para conectar el mundo funcional SAP con el mundo del desarrollo ABAP, usando la BAPI_PRODORD_CREATE como caso práctico.</p>
+
+    <div class="author-card">
+      <div class="author-avatar">CP</div>
+      <div class="author-info">
+        <div class="author-name">Carlos Gustavo Polo Gravina</div>
+        <div class="author-role">Consultor Senior SAP PP/PM · L1 Proyecto Sevilla</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- STICKY NAV -->
+<div class="progress-nav">
+  <div class="progress-inner">
+    <div class="nav-step active" onclick="goTo(0)">
+      <div class="nav-num">1</div>
+      <span>¿Qué es una BAPI?</span>
+    </div>
+    <div class="nav-step" onclick="goTo(1)">
+      <div class="nav-num">2</div>
+      <span>Estructura en SE37</span>
+    </div>
+    <div class="nav-step" onclick="goTo(2)">
+      <div class="nav-num">3</div>
+      <span>GetDetail primero</span>
+    </div>
+    <div class="nav-step" onclick="goTo(3)">
+      <div class="nav-num">4</div>
+      <span>Campos mínimos</span>
+    </div>
+    <div class="nav-step" onclick="goTo(4)">
+      <div class="nav-num">5</div>
+      <span>Ejecutar y verificar</span>
+    </div>
+    <div class="nav-step" onclick="goTo(5)">
+      <div class="nav-num">6</div>
+      <span>Verificar en CO03</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PASO 1 — QUÉ ES UNA BAPI
+════════════════════════════════════════════ -->
+<div class="step-panel active" id="panel-0">
+
+  <div class="step-header">
+    <div class="step-number">01</div>
+    <div class="step-titles">
+      <div class="step-tag">Conceptos base</div>
+      <div class="step-title">¿Qué es una BAPI y por qué existe?</div>
+      <div class="step-desc">Antes de ejecutar nada, entendemos el concepto. Una BAPI es la base de casi todo desarrollo de integración en SAP.</div>
+    </div>
+  </div>
+
+  <div class="pills-row">
+    <span class="pill pill-blue">SAP Standard</span>
+    <span class="pill pill-gold">Módulo PP</span>
+    <span class="pill pill-green">Sin código requerido</span>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-text">Una BAPI es como una ventanilla de banco. Tú no entras a la sala de servidores a mover el dinero tú mismo — le das los datos a la ventanilla, ella valida, procesa y te devuelve la respuesta. SAP ya programó esa ventanilla. Nosotros solo la usamos.</div>
+    <div class="analogy-source">— Analogía para equipos funcionales</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Definición técnica</div>
+    <p style="font-size:14px;color:var(--muted);line-height:1.8;">
+      <strong style="color:var(--text);font-weight:500;">BAPI</strong> (Business Application Programming Interface) es un módulo de función SAP estándar, con una interfaz estable, que permite crear, modificar o consultar objetos de negocio (órdenes, materiales, proveedores, etc.) de forma programática y segura.
+    </p>
+    <div class="callout callout-info" style="margin-top:16px;">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text">A diferencia de otros módulos de función, las BAPIs son <strong>estables entre versiones de SAP</strong>. Si un programa las usa hoy, seguirá funcionando en una versión futura del sistema.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Flujo universal de cualquier BAPI</div>
+    <div class="flow">
+      <div class="flow-box">
+        <div class="flow-box-label">Entrada</div>
+        <div class="flow-box-val">IMPORTING</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box highlight">
+        <div class="flow-box-label">Proceso</div>
+        <div class="flow-box-val">BAPI</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-box-label">Salida</div>
+        <div class="flow-box-val">EXPORTING</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-box-label">Resultado</div>
+        <div class="flow-box-val">RETURN</div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--dim);margin-top:8px;">Este flujo es idéntico en todas las BAPIs. Cambia el nombre, no el patrón.</p>
+  </div>
+
+  <div class="bottom-nav">
+    <span class="btn-ghost btn" style="visibility:hidden;">← Anterior</span>
+    <span class="step-counter">Paso 1 de 6</span>
+    <button class="btn btn-primary" onclick="goTo(1)">Siguiente → Estructura en SE37</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PASO 2 — ESTRUCTURA SE37
+════════════════════════════════════════════ -->
+<div class="step-panel" id="panel-1">
+
+  <div class="step-header">
+    <div class="step-number">02</div>
+    <div class="step-titles">
+      <div class="step-tag">Transacción SE37</div>
+      <div class="step-title">Entender la estructura de la BAPI</div>
+      <div class="step-desc">Antes de escribir una sola línea de código, exploramos la BAPI visualmente. Lo que ves en SE37 es exactamente lo que usará el programa.</div>
+    </div>
+  </div>
+
+  <div class="pills-row">
+    <span class="pill pill-blue">SE37</span>
+    <span class="pill pill-gold">BAPI_PRODORD_CREATE</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cómo acceder</div>
+    <div class="code-block">
+      <span class="code-label">SAP</span>
+      <span class="t-gray">1. </span>Ir a transacción <span class="t-blue">SE37</span><br>
+      <span class="t-gray">2. </span>Buscar: <span class="t-gold">BAPI_PRODORD_CREATE</span><br>
+      <span class="t-gray">3. </span>Ejecutar con <span class="t-green">F8</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Las tres pestañas que debes conocer</div>
+
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab(this,'t-import')">IMPORT</button>
+      <button class="tab-btn" onclick="switchTab(this,'t-export')">EXPORT</button>
+      <button class="tab-btn" onclick="switchTab(this,'t-tables')">TABLES</button>
+    </div>
+
+    <div class="tab-content active" id="t-import">
+      <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">Lo que <strong style="color:var(--text)">nosotros metemos</strong> a la función. Son los datos de entrada que necesita para ejecutar su lógica.</p>
+      <div class="callout callout-info">
+        <div class="callout-icon">📥</div>
+        <div class="callout-text">Aquí van el material, la planta, el tipo de orden, la cantidad, las fechas. Son los <strong>parámetros obligatorios</strong> para que la BAPI sepa qué crear.</div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="t-export">
+      <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">Lo que la función <strong style="color:var(--text)">nos devuelve</strong> después de ejecutar. El resultado del proceso.</p>
+      <div class="callout callout-info">
+        <div class="callout-icon">📤</div>
+        <div class="callout-text">El campo más importante aquí es <strong>ORDER_NUMBER</strong> — si la creación fue exitosa, aquí viene el número de la orden recién generada en SAP.</div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="t-tables">
+      <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">La tabla <strong style="color:var(--text)">RETURN</strong> es la más importante. Contiene todos los mensajes: éxitos, errores y advertencias.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text"><strong>Regla de oro:</strong> siempre revisa la tabla RETURN después de ejecutar. Si no hay errores aquí, la operación fue exitosa.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn" onclick="goTo(0)">← Anterior</button>
+    <span class="step-counter">Paso 2 de 6</span>
+    <button class="btn btn-primary" onclick="goTo(2)">Siguiente → GetDetail primero</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PASO 3 — GETDETAIL PRIMERO
+════════════════════════════════════════════ -->
+<div class="step-panel" id="panel-2">
+
+  <div class="step-header">
+    <div class="step-number">03</div>
+    <div class="step-titles">
+      <div class="step-tag">Buenas prácticas</div>
+      <div class="step-title">Consultar antes de crear</div>
+      <div class="step-desc">Un paso que la mayoría salta y que evita el 80% de los errores. Antes de crear, consultamos una orden existente para ver exactamente cómo vienen los datos.</div>
+    </div>
+  </div>
+
+  <div class="pills-row">
+    <span class="pill pill-blue">SE37</span>
+    <span class="pill pill-gold">BAPI_PRODORD_GETDETAIL</span>
+    <span class="pill pill-green">Lectura · Sin cambios</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Por qué usar GetDetail primero</div>
+    <p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px;">Los campos en SAP tienen formatos específicos — un material puede tener ceros a la izquierda, una planta puede ir con o sin punto, etc. Si los mandamos en el formato incorrecto, la BAPI devuelve error.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">✨</div>
+      <div class="callout-text"><strong>La estrategia:</strong> tomar una orden de producción que ya existe en el sistema, consultarla con GetDetail, ver cómo SAP tiene guardados esos valores y usar exactamente esos mismos formatos en el Create.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cómo usarla en SE37</div>
+    <div class="code-block">
+      <span class="code-label">SE37</span>
+      <span class="t-gray">1. </span>Buscar: <span class="t-gold">BAPI_PRODORD_GETDETAIL</span><br>
+      <span class="t-gray">2. </span>En IMPORT → <span class="t-blue">NUMBER</span> = número de orden existente (ej: <span class="t-green">000001234567</span>)<br>
+      <span class="t-gray">3. </span>Ejecutar con <span class="t-green">F8</span><br>
+      <span class="t-gray">4. </span>Revisar EXPORT → <span class="t-blue">ORDER_OBJECTS</span> para ver todos los campos<br>
+      <span class="t-gray">5. </span>Anotar: MATERIAL, PLANT, ORDER_TYPE, QUANTITY y formato de fechas
+    </div>
+    <div class="callout callout-info" style="margin-top:16px;">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text"><strong>Conexión con el código:</strong> en un programa ABAP, haríamos exactamente lo mismo — primero llamamos GetDetail para validar que el material existe y tiene el formato correcto, y luego pasamos esos datos al Create. Eso es exactamente lo que hace un desarrollador.</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn" onclick="goTo(1)">← Anterior</button>
+    <span class="step-counter">Paso 3 de 6</span>
+    <button class="btn btn-primary" onclick="goTo(3)">Siguiente → Campos mínimos</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PASO 4 — CAMPOS MÍNIMOS
+════════════════════════════════════════════ -->
+<div class="step-panel" id="panel-3">
+
+  <div class="step-header">
+    <div class="step-number">04</div>
+    <div class="step-titles">
+      <div class="step-tag">BAPI_PRODORD_CREATE · IMPORT</div>
+      <div class="step-title">Campos mínimos para crear la orden</div>
+      <div class="step-desc">Con estos 6 campos SAP puede crear la orden. El resto de valores los hereda del maestro de materiales y la configuración del tipo de orden.</div>
+    </div>
+  </div>
+
+  <div class="pills-row">
+    <span class="pill pill-blue">SE37</span>
+    <span class="pill pill-gold">BAPI_PRODORD_CREATE</span>
+    <span class="pill pill-green">Pestaña: IMPORT</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Rellenar en la pestaña IMPORT</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Campo SAP</th>
+          <th>Valor ejemplo</th>
+          <th>Formato</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="field-name">MATERIAL</div>
+            <div class="field-note">Material a producir</div>
+          </td>
+          <td><span class="field-val">322B46433R</span></td>
+          <td><span class="field-fmt">Texto · hasta 18 caracteres</span></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="field-name">PLANT</div>
+            <div class="field-note">Centro productivo</div>
+          </td>
+          <td><span class="field-val">1000</span></td>
+          <td><span class="field-fmt">4 caracteres numéricos</span></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="field-name">ORDER_TYPE</div>
+            <div class="field-note">Tipo de orden de fabricación</div>
+          </td>
+          <td><span class="field-val">PP01</span></td>
+          <td><span class="field-fmt">4 caracteres alfanuméricos</span></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="field-name">QUANTITY</div>
+            <div class="field-note">Cantidad a producir</div>
+          </td>
+          <td><span class="field-val">10</span></td>
+          <td><span class="field-fmt">Número · sin decimales</span></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="field-name">BASIC_START_DATE</div>
+            <div class="field-note">Fecha inicio prevista</div>
+          </td>
+          <td><span class="field-val">10.04.2026</span></td>
+          <td><span class="field-fmt">DD.MM.AAAA · crítico</span></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="field-name">BASIC_END_DATE</div>
+            <div class="field-note">Fecha fin prevista</div>
+          </td>
+          <td><span class="field-val">17.04.2026</span></td>
+          <td><span class="field-fmt">DD.MM.AAAA · crítico</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout callout-warn" style="margin-top:16px;">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-text"><strong>Formato de fecha es crítico.</strong> Si la fecha no va en DD.MM.AAAA la BAPI devuelve error inmediatamente en la tabla RETURN. Es el error más común.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Conexión con el código ABAP</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Cada uno de estos campos en SE37 corresponde exactamente a un parámetro en el código:</p>
+    <div class="code-block">
+      <span class="code-label">ABAP</span>
+<span class="t-blue">CALL FUNCTION</span> <span class="t-gold">'BAPI_PRODORD_CREATE'</span>
+  <span class="t-blue">EXPORTING</span>
+    material         = <span class="t-green">'322B46433R'</span>   <span class="t-gray">"← MATERIAL</span>
+    plant            = <span class="t-green">'1000'</span>          <span class="t-gray">"← PLANT</span>
+    order_type       = <span class="t-green">'PP01'</span>          <span class="t-gray">"← ORDER_TYPE</span>
+    quantity         = <span class="t-green">10</span>              <span class="t-gray">"← QUANTITY</span>
+    basic_start_date = <span class="t-green">'10.04.2026'</span>    <span class="t-gray">"← START_DATE</span>
+    basic_end_date   = <span class="t-green">'17.04.2026'</span>    <span class="t-gray">"← END_DATE</span>
+  <span class="t-blue">IMPORTING</span>
+    order_number     = lv_orden.        <span class="t-gray">"← lo que devuelve</span>
+    </div>
+    <p style="font-size:12px;color:var(--dim);margin-top:10px;">Lo que ejecutas manualmente en SE37 es exactamente lo que el código hace automáticamente. El programa no hace nada diferente — solo lo hace sin que tú tengas que escribirlo a mano cada vez.</p>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn" onclick="goTo(2)">← Anterior</button>
+    <span class="step-counter">Paso 4 de 6</span>
+    <button class="btn btn-primary" onclick="goTo(4)">Siguiente → Ejecutar y verificar</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PASO 5 — EJECUTAR Y VERIFICAR
+════════════════════════════════════════════ -->
+<div class="step-panel" id="panel-4">
+
+  <div class="step-header">
+    <div class="step-number">05</div>
+    <div class="step-titles">
+      <div class="step-tag">Ejecución y resultado</div>
+      <div class="step-title">Ejecutar y leer el resultado</div>
+      <div class="step-desc">Presionamos F8 y SAP nos devuelve una respuesta. Saber leer esa respuesta es tan importante como saber ejecutar la BAPI.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Secuencia de ejecución en SE37 — paso a paso</div>
+    <div class="code-block">
+      <span class="code-label">SE37 · Llamada 1</span>
+      <span class="t-gray">1. </span>Buscar <span class="t-gold">BAPI_PRODORD_CREATE</span> en SE37<br>
+      <span class="t-gray">2. </span>Rellenar los campos mínimos en pestaña IMPORT<br>
+      <span class="t-gray">3. </span>Ejecutar con <span class="t-green">F8</span><br>
+      <span class="t-gray">4. </span>Revisar pestaña <span class="t-blue">TABLES → RETURN</span><br>
+      <span class="t-gray">5. </span>Si TYPE = <span class="t-green">S</span> → anotar el <span class="t-gold">ORDER_NUMBER</span> de pestaña EXPORT<br>
+      <span class="t-gray">   </span>Si TYPE = <span class="t-red">E</span> → leer MESSAGE y corregir datos. No continuar.
+    </div>
+    <div class="callout callout-warn" style="margin-top:12px;">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-text"><strong>Importante:</strong> en este punto la orden existe solo en memoria temporal de SAP. Todavía NO está grabada en base de datos. Si cierras la sesión o no ejecutas el COMMIT, desaparece.</div>
+    </div>
+    <div class="code-block" style="margin-top:12px;">
+      <span class="code-label">SE37 · Llamada 2 — El COMMIT</span>
+      <span class="t-gray">6. </span>Volver a SE37 y buscar <span class="t-gold">BAPI_TRANSACTION_COMMIT</span><br>
+      <span class="t-gray">7. </span>En el campo <span class="t-blue">WAIT</span> introducir <span class="t-green">X</span><br>
+      <span class="t-gray">8. </span>Ejecutar con <span class="t-green">F8</span><br>
+      <span class="t-gray">9. </span>Ahora sí la orden queda grabada definitivamente en SAP
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">¿Por qué existe el COMMIT? — La analogía del carrito</div>
+    <div class="analogy" style="margin-bottom:0;">
+      <div class="analogy-text">Imagina que estás comprando en un supermercado online. Vas añadiendo productos al carrito — pero eso no significa que hayas comprado nada. El carrito es temporal. Solo cuando pulsas <em>"Confirmar pedido"</em> la compra se hace real y se descuenta de tu cuenta.<br><br>SAP funciona igual. La BAPI añade la orden al "carrito" de la base de datos. El <em>COMMIT</em> es el botón de "Confirmar". Sin él, SAP descarta todo al cerrar la sesión.</div>
+      <div class="analogy-source">— Por eso siempre va en dos llamadas separadas</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Interpretar la tabla RETURN</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">El campo <strong style="color:var(--text)">TYPE</strong> te dice todo lo que necesitas saber:</p>
+
+    <div class="badge-row">
+      <div class="status-badge">
+        <div class="badge-dot s"></div>
+        <div>
+          <div><span class="badge-type s">S</span> <span style="font-size:13px;font-weight:500;color:var(--text)">Success</span></div>
+          <div class="badge-desc">Todo correcto. Ejecutar COMMIT.</div>
+        </div>
+      </div>
+      <div class="status-badge">
+        <div class="badge-dot e"></div>
+        <div>
+          <div><span class="badge-type e">E</span> <span style="font-size:13px;font-weight:500;color:var(--text)">Error</span></div>
+          <div class="badge-desc">Falló. Ver MESSAGE. No hacer COMMIT.</div>
+        </div>
+      </div>
+      <div class="status-badge">
+        <div class="badge-dot w"></div>
+        <div>
+          <div><span class="badge-type w">W</span> <span style="font-size:13px;font-weight:500;color:var(--text)">Warning</span></div>
+          <div class="badge-desc">Procesó con advertencia. Evaluar antes de COMMIT.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cómo lo haría un programa ABAP</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">El código replica exactamente la misma secuencia de dos llamadas que acabas de hacer manualmente:</p>
+    <div class="code-block">
+      <span class="code-label">ABAP</span>
+<span class="t-gray">"── Llamada 1: Crear la orden ──────────────────</span>
+<span class="t-blue">CALL FUNCTION</span> <span class="t-gold">'BAPI_PRODORD_CREATE'</span>
+  <span class="t-blue">EXPORTING</span>  material = lv_material  plant = lv_plant ...
+  <span class="t-blue">IMPORTING</span>  order_number = lv_orden
+  <span class="t-blue">TABLES</span>     return = lt_return.
+
+<span class="t-gray">"── Verificar resultado ────────────────────────</span>
+<span class="t-blue">READ TABLE</span> lt_return <span class="t-blue">INTO</span> ls_return <span class="t-blue">WITH KEY</span> type = <span class="t-gold">'E'</span>.
+
+<span class="t-blue">IF</span> sy-subrc = <span class="t-green">0</span>.
+  <span class="t-gray">"Hubo error → descartar todo</span>
+  <span class="t-blue">CALL FUNCTION</span> <span class="t-gold">'BAPI_TRANSACTION_ROLLBACK'</span>.
+
+<span class="t-blue">ELSE</span>.
+  <span class="t-gray">"── Llamada 2: COMMIT — grabar definitivamente ─</span>
+  <span class="t-blue">CALL FUNCTION</span> <span class="t-gold">'BAPI_TRANSACTION_COMMIT'</span>
+    <span class="t-blue">EXPORTING</span> wait = <span class="t-gold">'X'</span>.  <span class="t-gray">"WAIT=X: espera a que grabe antes de continuar</span>
+  <span class="t-blue">WRITE</span>: / <span class="t-gold">'Orden creada:'</span>, lv_orden.
+
+<span class="t-blue">ENDIF</span>.
+    </div>
+    <div class="callout callout-info" style="margin-top:12px;">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text"><strong>WAIT = X</strong> le dice a SAP que espere a que el COMMIT termine completamente antes de seguir ejecutando el programa. Sin eso, el programa podría intentar leer la orden antes de que exista.</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn" onclick="goTo(3)">← Anterior</button>
+    <span class="step-counter">Paso 5 de 6</span>
+    <button class="btn btn-primary" onclick="goTo(5)">Siguiente → Verificar en CO03</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PASO 6 — CO03
+════════════════════════════════════════════ -->
+<div class="step-panel" id="panel-5">
+
+  <div class="step-header">
+    <div class="step-number">06</div>
+    <div class="step-titles">
+      <div class="step-tag">Validación final</div>
+      <div class="step-title">Verificar la orden en CO03</div>
+      <div class="step-desc">El paso que conecta todo. Aquí ves que lo que hiciste en SE37 — o lo que haría un programa — tiene un resultado real y concreto en SAP.</div>
+    </div>
+  </div>
+
+  <div class="pills-row">
+    <span class="pill pill-blue">CO03</span>
+    <span class="pill pill-green">Solo lectura · Sin riesgo</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Pasos para verificar</div>
+    <div class="code-block">
+      <span class="code-label">SAP</span>
+      <span class="t-gray">1. </span>Ir a transacción <span class="t-blue">CO03</span><br>
+      <span class="t-gray">2. </span>Introducir el número de orden devuelto por la BAPI<br>
+      <span class="t-gray">3. </span>Ejecutar con <span class="t-green">Intro</span> o <span class="t-green">F8</span><br>
+      <span class="t-gray">4. </span>Verificar: material, cantidad, fechas, estado
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-text">Lo que acabas de hacer manualmente en SE37, un programa ABAP lo puede ejecutar automáticamente con los mismos campos y la misma lógica — para 1 orden o para 10.000. La diferencia no es qué hace, sino quién lo hace y cuántas veces.</div>
+    <div class="analogy-source">— La conexión entre mundo funcional y desarrollo</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Resumen del flujo completo</div>
+    <div class="flow" style="flex-wrap:wrap;gap:8px;">
+      <div class="flow-box" style="min-width:90px;">
+        <div class="flow-box-label">Consultar</div>
+        <div class="flow-box-val">GetDetail</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box highlight" style="min-width:90px;">
+        <div class="flow-box-label">Crear</div>
+        <div class="flow-box-val">Create</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="min-width:90px;">
+        <div class="flow-box-label">Verificar</div>
+        <div class="flow-box-val">RETURN</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="min-width:90px;">
+        <div class="flow-box-label">Grabar</div>
+        <div class="flow-box-val">COMMIT</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="min-width:90px;">
+        <div class="flow-box-label">Validar</div>
+        <div class="flow-box-val">CO03</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg, rgba(59,130,246,0.06), rgba(16,185,129,0.04)); border-color:rgba(59,130,246,0.2);">
+    <div class="card-title" style="color:var(--accent2);">Próximos pasos</div>
+    <p style="font-size:14px;color:var(--muted);line-height:1.8;">
+      Una vez dominado este flujo, el siguiente nivel es encapsularlo en un <strong style="color:var(--text)">programa ABAP</strong> que pida los datos por pantalla (usando <code style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);">PARAMETERS</code>) y ejecute la BAPI automáticamente. Eso es exactamente lo que un cliente solicita cuando dice "quiero un desarrollo para crear órdenes de forma más rápida".
+    </p>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn" onclick="goTo(4)">← Anterior</button>
+    <span class="step-counter">Paso 6 de 6</span>
+    <button class="btn btn-primary" onclick="goTo(0)" style="background:var(--success);border-color:var(--success);">↩ Volver al inicio</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <div class="brand-logo" style="width:32px;height:32px;font-size:13px;">St</div>
+    <div>
+      <div style="font-size:13px;font-weight:500;">Stratesys · Centro de Excelencia SAP</div>
+      <div style="font-size:11px;color:var(--dim);margin-top:1px;">Documento interno · Uso en capacitaciones</div>
+    </div>
+  </div>
+  <span class="footer-ver">v1.0 · Abril 2026</span>
+</footer>
+
+</div>
+
+<script>
+const panels = document.querySelectorAll('.step-panel');
+const navSteps = document.querySelectorAll('.nav-step');
+let current = 0;
+
+function goTo(n) {
+  panels[current].classList.remove('active');
+  navSteps[current].classList.remove('active');
+  if (current < n) navSteps[current].classList.add('done');
+  else navSteps[current].classList.remove('done');
+
+  current = n;
+  panels[current].classList.add('active');
+  navSteps[current].classList.add('active');
+  navSteps[current].classList.remove('done');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchTab(btn, id) {
+  const card = btn.closest('.card');
+  card.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  card.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
