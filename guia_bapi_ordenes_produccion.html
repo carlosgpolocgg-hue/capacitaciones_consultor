@@ -690,7 +690,7 @@ footer {
       <div class="author-avatar">CP</div>
       <div class="author-info">
         <div class="author-name">Carlos Gustavo Polo Gravina</div>
-        <div class="author-role">Consultor Senior SAP PP/PM · L1 Proyecto Sevilla</div>
+        <div class="author-role">Consultor Senior SAP PP/PM · Stratesys</div>
       </div>
     </div>
   </div>
@@ -842,18 +842,18 @@ footer {
     </div>
 
     <div class="tab-content" id="t-export">
-      <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">Lo que la función <strong style="color:var(--text)">nos devuelve</strong> después de ejecutar. El resultado del proceso.</p>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">Lo que la función <strong style="color:var(--text)">nos devuelve</strong> si la ejecución fue exitosa.</p>
       <div class="callout callout-info">
         <div class="callout-icon">📤</div>
-        <div class="callout-text">El campo más importante aquí es <strong>ORDER_NUMBER</strong> — si la creación fue exitosa, aquí viene el número de la orden recién generada en SAP.</div>
+        <div class="callout-text">El campo más importante aquí es <strong>ORDER_NUMBER</strong> — el número de la orden recién creada. <strong>Ojo:</strong> este campo solo tiene valor si no hubo errores. Para saber si hubo errores, siempre hay que revisar primero la pestaña TABLES.</div>
       </div>
     </div>
 
     <div class="tab-content" id="t-tables">
-      <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">La tabla <strong style="color:var(--text)">RETURN</strong> es la más importante. Contiene todos los mensajes: éxitos, errores y advertencias.</p>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">La tabla <strong style="color:var(--text)">RETURN</strong> es la más importante. Es donde SAP nos dice si todo fue bien o si hubo algún problema.</p>
       <div class="callout callout-warn">
         <div class="callout-icon">⚠️</div>
-        <div class="callout-text"><strong>Regla de oro:</strong> siempre revisa la tabla RETURN después de ejecutar. Si no hay errores aquí, la operación fue exitosa.</div>
+        <div class="callout-text"><strong>Regla de oro:</strong> siempre revisa TABLES → RETURN primero. El campo TYPE te dice el veredicto: S = éxito, E = error, W = advertencia. Solo si es S vas a EXPORT a buscar el ORDER_NUMBER.</div>
       </div>
     </div>
   </div>
@@ -895,18 +895,32 @@ footer {
   </div>
 
   <div class="card">
-    <div class="card-title">Cómo usarla en SE37</div>
+    <div class="card-title">Abrir dos sesiones en paralelo</div>
+    <p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px;">Para trabajar cómodamente vas a necesitar <strong style="color:var(--text)">dos ventanas de SE37 abiertas al mismo tiempo</strong> — una con el GetDetail y otra con el Create. Así puedes consultar los datos en una y copiarlos en la otra sin perder nada.</p>
     <div class="code-block">
-      <span class="code-label">SE37</span>
+      <span class="code-label">SAP · Cómo abrir sesión paralela</span>
+      <span class="t-gray">1. </span>En SAP, menú superior → <span class="t-blue">Sistema</span> → <span class="t-blue">Crear sesión</span><br>
+      <span class="t-gray">   </span>O también puedes usar el atajo <span class="t-green">/o</span> en la barra de transacciones<br>
+      <span class="t-gray">2. </span>Se abre una nueva ventana de SAP independiente<br>
+      <span class="t-gray">3. </span>En esa nueva ventana abre <span class="t-gold">SE37</span> con <span class="t-gold">BAPI_PRODORD_GETDETAIL</span><br>
+      <span class="t-gray">4. </span>En la ventana original deja <span class="t-gold">BAPI_PRODORD_CREATE</span> lista para rellenar
+    </div>
+    <div class="callout callout-tip" style="margin-top:12px;">
+      <div class="callout-icon">✨</div>
+      <div class="callout-text">Con ambas ventanas lado a lado puedes ver exactamente cómo SAP tiene guardado cada valor en el GetDetail y copiarlo directamente al Create — sin adivinar formatos ni cometer errores.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cómo usar GetDetail en SE37</div>
+    <div class="code-block">
+      <span class="code-label">Ventana 1 — GetDetail</span>
       <span class="t-gray">1. </span>Buscar: <span class="t-gold">BAPI_PRODORD_GETDETAIL</span><br>
       <span class="t-gray">2. </span>En IMPORT → <span class="t-blue">NUMBER</span> = número de orden existente (ej: <span class="t-green">000001234567</span>)<br>
-      <span class="t-gray">3. </span>Ejecutar con <span class="t-green">F8</span><br>
-      <span class="t-gray">4. </span>Revisar EXPORT → <span class="t-blue">ORDER_OBJECTS</span> para ver todos los campos<br>
-      <span class="t-gray">5. </span>Anotar: MATERIAL, PLANT, ORDER_TYPE, QUANTITY y formato de fechas
-    </div>
-    <div class="callout callout-info" style="margin-top:16px;">
-      <div class="callout-icon">💡</div>
-      <div class="callout-text"><strong>Conexión con el código:</strong> en un programa ABAP, haríamos exactamente lo mismo — primero llamamos GetDetail para validar que el material existe y tiene el formato correcto, y luego pasamos esos datos al Create. Eso es exactamente lo que hace un desarrollador.</div>
+      <span class="t-gray">3. </span>En IMPORT → <span class="t-blue">ORDER_OBJECTS</span> → marcar <span class="t-green">HEADER = X</span> como mínimo<br>
+      <span class="t-gray">4. </span>Ejecutar con <span class="t-green">F8</span><br>
+      <span class="t-gray">5. </span>Revisar TABLES → <span class="t-blue">ORDER_OBJECTS</span> para ver los campos con sus valores reales<br>
+      <span class="t-gray">6. </span>Anotar: MATERIAL, PLANT, ORDER_TYPE, QUANTITY y formato de fechas
     </div>
   </div>
 
@@ -1004,25 +1018,6 @@ footer {
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">Conexión con el código ABAP</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Cada uno de estos campos en SE37 corresponde exactamente a un parámetro en el código:</p>
-    <div class="code-block">
-      <span class="code-label">ABAP</span>
-<span class="t-blue">CALL FUNCTION</span> <span class="t-gold">'BAPI_PRODORD_CREATE'</span>
-  <span class="t-blue">EXPORTING</span>
-    material         = <span class="t-green">'322B46433R'</span>   <span class="t-gray">"← MATERIAL</span>
-    plant            = <span class="t-green">'1000'</span>          <span class="t-gray">"← PLANT</span>
-    order_type       = <span class="t-green">'PP01'</span>          <span class="t-gray">"← ORDER_TYPE</span>
-    quantity         = <span class="t-green">10</span>              <span class="t-gray">"← QUANTITY</span>
-    basic_start_date = <span class="t-green">'10.04.2026'</span>    <span class="t-gray">"← START_DATE</span>
-    basic_end_date   = <span class="t-green">'17.04.2026'</span>    <span class="t-gray">"← END_DATE</span>
-  <span class="t-blue">IMPORTING</span>
-    order_number     = lv_orden.        <span class="t-gray">"← lo que devuelve</span>
-    </div>
-    <p style="font-size:12px;color:var(--dim);margin-top:10px;">Lo que ejecutas manualmente en SE37 es exactamente lo que el código hace automáticamente. El programa no hace nada diferente — solo lo hace sin que tú tengas que escribirlo a mano cada vez.</p>
-  </div>
-
   <div class="bottom-nav">
     <button class="btn" onclick="goTo(2)">← Anterior</button>
     <span class="step-counter">Paso 4 de 6</span>
@@ -1045,34 +1040,55 @@ footer {
   </div>
 
   <div class="card">
-    <div class="card-title">Secuencia de ejecución en SE37 — paso a paso</div>
+    <div class="card-title">¿Qué es la secuencia de test y por qué usarla?</div>
+    <p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px;">La <strong style="color:var(--text)">secuencia de test</strong> es una función de SE37 que te permite encadenar varias BAPIs y ejecutarlas en orden con una sola acción. En nuestro caso necesitamos ejecutar dos: primero el <strong style="color:var(--text)">Create</strong> y luego el <strong style="color:var(--text)">Commit</strong>. Sin esta herramienta tendrías que hacerlo en dos sesiones separadas y manualmente, con riesgo de olvidar el Commit.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">✨</div>
+      <div class="callout-text">La secuencia de test garantiza que ambas BAPIs se ejecuten en el orden correcto y dentro de la misma sesión. Es la forma estándar de probar BAPIs en SE37 cuando se necesita más de una llamada.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cómo llegar a la secuencia de test</div>
     <div class="code-block">
-      <span class="code-label">SE37 · Llamada 1</span>
-      <span class="t-gray">1. </span>Buscar <span class="t-gold">BAPI_PRODORD_CREATE</span> en SE37<br>
-      <span class="t-gray">2. </span>Rellenar los campos mínimos en pestaña IMPORT<br>
-      <span class="t-gray">3. </span>Ejecutar con <span class="t-green">F8</span><br>
-      <span class="t-gray">4. </span>Revisar pestaña <span class="t-blue">TABLES → RETURN</span><br>
-      <span class="t-gray">5. </span>Si TYPE = <span class="t-green">S</span> → anotar el <span class="t-gold">ORDER_NUMBER</span> de pestaña EXPORT<br>
-      <span class="t-gray">   </span>Si TYPE = <span class="t-red">E</span> → leer MESSAGE y corregir datos. No continuar.
+      <span class="code-label">SE37 · Navegación</span>
+      <span class="t-gray">1. </span>Abrir <span class="t-blue">SE37</span> y buscar <span class="t-gold">BAPI_PRODORD_CREATE</span><br>
+      <span class="t-gray">2. </span>En el menú superior ir a <span class="t-blue">Módulo de funciones</span> → <span class="t-blue">Ejecutar</span> → <span class="t-gold">Secuencia de test</span><br>
+      <span class="t-gray">3. </span>Se abre la pantalla de secuencia — aquí es donde añadiremos las dos BAPIs
     </div>
-    <div class="callout callout-warn" style="margin-top:12px;">
-      <div class="callout-icon">⚠️</div>
-      <div class="callout-text"><strong>Importante:</strong> en este punto la orden existe solo en memoria temporal de SAP. Todavía NO está grabada en base de datos. Si cierras la sesión o no ejecutas el COMMIT, desaparece.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Añadir las BAPIs en la secuencia</div>
+    <div class="code-block">
+      <span class="code-label">Secuencia de test · Paso 1 — Agregar Create</span>
+      <span class="t-gray">1. </span>En la pantalla de secuencia, toca <span class="t-blue">Insertar módulo de funciones</span> (o el ícono +)<br>
+      <span class="t-gray">2. </span>Escribe <span class="t-gold">BAPI_PRODORD_CREATE</span> y confirma<br>
+      <span class="t-gray">3. </span>Se añade como primer paso de la secuencia<br>
+      <span class="t-gray">4. </span>Selecciónala y rellena los campos IMPORT con los valores del Paso 4<br>
+      <span class="t-gray">   </span>(MATERIAL, PLANT, ORDER_TYPE, QUANTITY, fechas)
     </div>
-    <div class="code-block" style="margin-top:12px;">
-      <span class="code-label">SE37 · Llamada 2 — El COMMIT</span>
-      <span class="t-gray">6. </span>Volver a SE37 y buscar <span class="t-gold">BAPI_TRANSACTION_COMMIT</span><br>
-      <span class="t-gray">7. </span>En el campo <span class="t-blue">WAIT</span> introducir <span class="t-green">X</span><br>
-      <span class="t-gray">8. </span>Ejecutar con <span class="t-green">F8</span><br>
-      <span class="t-gray">9. </span>Ahora sí la orden queda grabada definitivamente en SAP
+    <div class="code-block" style="margin-top:10px;">
+      <span class="code-label">Secuencia de test · Paso 2 — Agregar Commit</span>
+      <span class="t-gray">5. </span>Vuelve a tocar <span class="t-blue">Insertar módulo de funciones</span><br>
+      <span class="t-gray">6. </span>Escribe <span class="t-gold">BAPI_TRANSACTION_COMMIT</span> y confirma<br>
+      <span class="t-gray">7. </span>Se añade como segundo paso — justo después del Create<br>
+      <span class="t-gray">8. </span>Selecciónala y en el campo <span class="t-blue">WAIT</span> introduce <span class="t-green">X</span>
+    </div>
+    <div class="code-block" style="margin-top:10px;">
+      <span class="code-label">Secuencia de test · Ejecutar</span>
+      <span class="t-gray">9. </span>Con ambas BAPIs en la secuencia, ejecuta con <span class="t-green">F8</span><br>
+      <span class="t-gray">10. </span>SAP ejecuta primero el Create y luego el Commit automáticamente<br>
+      <span class="t-gray">11. </span>Revisa el resultado del Create → <span class="t-blue">TABLES → RETURN</span> → campo TYPE<br>
+      <span class="t-gray">12. </span>Si TYPE = <span class="t-green">S</span> → ve a <span class="t-blue">EXPORT → ORDER_NUMBER</span> y anota el número de orden
     </div>
   </div>
 
   <div class="card">
     <div class="card-title">¿Por qué existe el COMMIT? — La analogía del carrito</div>
     <div class="analogy" style="margin-bottom:0;">
-      <div class="analogy-text">Imagina que estás comprando en un supermercado online. Vas añadiendo productos al carrito — pero eso no significa que hayas comprado nada. El carrito es temporal. Solo cuando pulsas <em>"Confirmar pedido"</em> la compra se hace real y se descuenta de tu cuenta.<br><br>SAP funciona igual. La BAPI añade la orden al "carrito" de la base de datos. El <em>COMMIT</em> es el botón de "Confirmar". Sin él, SAP descarta todo al cerrar la sesión.</div>
-      <div class="analogy-source">— Por eso siempre va en dos llamadas separadas</div>
+      <div class="analogy-text">Imagina que estás comprando en un supermercado online. Vas añadiendo productos al carrito — pero eso no significa que hayas comprado nada. El carrito es temporal. Solo cuando pulsas <em>"Confirmar pedido"</em> la compra se hace real.<br><br>SAP funciona igual. La BAPI añade la orden al "carrito" de la base de datos. El <em>COMMIT</em> es el botón de "Confirmar". Sin él, SAP descarta todo al cerrar la sesión.</div>
+      <div class="analogy-source">— Por eso siempre van juntos en la secuencia</div>
     </div>
   </div>
 
@@ -1085,55 +1101,23 @@ footer {
         <div class="badge-dot s"></div>
         <div>
           <div><span class="badge-type s">S</span> <span style="font-size:13px;font-weight:500;color:var(--text)">Success</span></div>
-          <div class="badge-desc">Todo correcto. Ejecutar COMMIT.</div>
+          <div class="badge-desc">Orden creada y grabada.</div>
         </div>
       </div>
       <div class="status-badge">
         <div class="badge-dot e"></div>
         <div>
           <div><span class="badge-type e">E</span> <span style="font-size:13px;font-weight:500;color:var(--text)">Error</span></div>
-          <div class="badge-desc">Falló. Ver MESSAGE. No hacer COMMIT.</div>
+          <div class="badge-desc">Falló. Ver MESSAGE y corregir.</div>
         </div>
       </div>
       <div class="status-badge">
         <div class="badge-dot w"></div>
         <div>
           <div><span class="badge-type w">W</span> <span style="font-size:13px;font-weight:500;color:var(--text)">Warning</span></div>
-          <div class="badge-desc">Procesó con advertencia. Evaluar antes de COMMIT.</div>
+          <div class="badge-desc">Creó con advertencia. Revisar.</div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Cómo lo haría un programa ABAP</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">El código replica exactamente la misma secuencia de dos llamadas que acabas de hacer manualmente:</p>
-    <div class="code-block">
-      <span class="code-label">ABAP</span>
-<span class="t-gray">"── Llamada 1: Crear la orden ──────────────────</span>
-<span class="t-blue">CALL FUNCTION</span> <span class="t-gold">'BAPI_PRODORD_CREATE'</span>
-  <span class="t-blue">EXPORTING</span>  material = lv_material  plant = lv_plant ...
-  <span class="t-blue">IMPORTING</span>  order_number = lv_orden
-  <span class="t-blue">TABLES</span>     return = lt_return.
-
-<span class="t-gray">"── Verificar resultado ────────────────────────</span>
-<span class="t-blue">READ TABLE</span> lt_return <span class="t-blue">INTO</span> ls_return <span class="t-blue">WITH KEY</span> type = <span class="t-gold">'E'</span>.
-
-<span class="t-blue">IF</span> sy-subrc = <span class="t-green">0</span>.
-  <span class="t-gray">"Hubo error → descartar todo</span>
-  <span class="t-blue">CALL FUNCTION</span> <span class="t-gold">'BAPI_TRANSACTION_ROLLBACK'</span>.
-
-<span class="t-blue">ELSE</span>.
-  <span class="t-gray">"── Llamada 2: COMMIT — grabar definitivamente ─</span>
-  <span class="t-blue">CALL FUNCTION</span> <span class="t-gold">'BAPI_TRANSACTION_COMMIT'</span>
-    <span class="t-blue">EXPORTING</span> wait = <span class="t-gold">'X'</span>.  <span class="t-gray">"WAIT=X: espera a que grabe antes de continuar</span>
-  <span class="t-blue">WRITE</span>: / <span class="t-gold">'Orden creada:'</span>, lv_orden.
-
-<span class="t-blue">ENDIF</span>.
-    </div>
-    <div class="callout callout-info" style="margin-top:12px;">
-      <div class="callout-icon">💡</div>
-      <div class="callout-text"><strong>WAIT = X</strong> le dice a SAP que espere a que el COMMIT termine completamente antes de seguir ejecutando el programa. Sin eso, el programa podría intentar leer la orden antes de que exista.</div>
     </div>
   </div>
 
